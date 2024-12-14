@@ -27,7 +27,7 @@
 
             span {
                 display: block;
-                background-image: url('../img/action.png');
+                background-image: url('../img/actions/action.png');
                 background-repeat: no-repeat;
                 background-position: center;
                 width: 100%;
@@ -67,7 +67,7 @@
             cursor: pointer;
 
             span {
-                background-image: url("../img/like.png");
+                background-image: url("../img/actions/like.png");
                 background-repeat: no-repeat;
                 background-position: center;
                 display: block;
@@ -103,7 +103,7 @@
                 cursor: pointer;
 
                 i {
-                    background-image: url("../img/cart.png");
+                    background-image: url("../img/actions/cart.png");
                     background-repeat: no-repeat;
                     background-position: center;
                     display: block;
@@ -121,7 +121,7 @@
             cursor: pointer;
 
             span {
-                background-image: url("../img/user.png");
+                background-image: url("../img/actions/user.png");
                 background-repeat: no-repeat;
                 background-position: center;
                 display: block;
@@ -161,7 +161,7 @@
 
                     i {
                         position: absolute;
-                        background-image: url("../img/search.png");
+                        background-image: url("../img/actions/search.png");
                         background-repeat: no-repeat;
                         background-position: center;
                         width: 17px;
@@ -201,7 +201,7 @@
                     align-items: center;
 
                     i {
-                        background-image: url("../img/big-arrow.png");
+                        background-image: url("../img/actions/big-arrow.png");
                         background-position: center;
                         background-repeat: no-repeat;
                         width: 50px;
@@ -275,6 +275,44 @@
                 font-size: 14px;
                 color: #5E5E5E;
                 font-weight: 500;
+            }
+        }
+    }
+
+    .year-collections {
+        .collection-head {
+            .collection-accordion {
+                display: flex;
+                align-items: flex-end;
+                justify-content: space-between;
+
+                ul {
+                    display: flex;
+                    align-items: center;
+                    gap: 40px;
+
+                    .active {
+                        color: #000000;
+                        font-weight: 500;
+                    }
+
+                    li {
+                        color: #8A8A8A;
+                        cursor: pointer;
+                    }
+                }
+
+                .sort {
+                    font-size: 14px;
+
+                    span {
+                        font-family: monospace;
+                        cursor: pointer;
+                    }
+                }
+
+                border-bottom: 2px solid #DFDFDF;
+                padding-bottom: 10px;
             }
         }
     }

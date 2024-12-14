@@ -1,21 +1,14 @@
 import React from 'react';
 import '../../../assets/css/style.scss';
 import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
-import { GoPlus } from "react-icons/go";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import { Navigation } from 'swiper/modules';
 import Cloth1 from '../../../assets/img/cloth1.png';
 import Cloth2 from '../../../assets/img/cloth2.png';
-
-// images for week collection
-
-import Cloth3 from '../../../assets/img/cloth3.png'
-import Cloth4 from '../../../assets/img/cloth4.png'
-import Cloth5 from '../../../assets/img/cloth5.png'
-import Cloth6 from '../../../assets/img/cloth6.png'
-import Cloth7 from '../../../assets/img/cloth7.png'
+import WeekCollection from './WeekCollection';
+import YearCollection from './YearCollection';
 
 export default function Collection() {
     const images = [Cloth1, Cloth2, Cloth1, Cloth2];
@@ -69,77 +62,8 @@ export default function Collection() {
                     </Swiper>
                 </div>
             </div>
-            <div className='pt-[100px] week-collection'>
-                <div className="head flex justify-between items-end pr-[52px]">
-                    <div className='heading'>
-                        <h1>NEW <br /> THIS WEEK</h1>
-                        <p>(50)</p>
-                    </div>
-                    <span>See All</span>
-                </div>
-                <div className='products pt-[30px] flex gap-[26px]'>
-                    <div className='product w-[305px] h-[313px]'>
-                        <div className="img relative">
-                            <img src={Cloth7} />
-                            <span className='absolute bottom-0 bg-[#dcdcdc9c] w-[34px] h-[34px] right-[45%] flex items-center justify-center cursor-pointer'>
-                                <GoPlus className='text-whte text-[20px]' />
-                            </span>
-                        </div>
-                        <div className='details pt-[14px]'>
-                            <span className='type text-[#525252] text-[12px]'>V-Neck T-Shirt</span>
-                            <div className='detail flex justify-between'>
-                                <span className='text-[14px]'>Embroidered Seersucker Shirt</span>
-                                <span className='price text-[14px]'>$ 99</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className='product w-[305px] h-[313px]'>
-                        <div className="img relative">
-                            <img src={Cloth4} />
-                            <span className='absolute bottom-0 bg-[#dcdcdc9c] w-[34px] h-[34px] right-[45%] flex items-center justify-center cursor-pointer'>
-                                <GoPlus className='text-whte text-[20px]' />
-                            </span>
-                        </div>
-                        <div className='details pt-[14px]'>
-                            <span className='type text-[#525252] text-[12px]'>Cotton T-Shirt</span>
-                            <div className='detail flex justify-between'>
-                                <span className='text-[14px]'>Basic Slim Fit T-Shirt</span>
-                                <span className='price text-[14px]'>$ 120</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className='product w-[305px] h-[313px]'>
-                        <div className="img relative">
-                            <img src={Cloth5} />
-                            <span className='absolute bottom-0 bg-[#dcdcdc9c] w-[34px] h-[34px] right-[45%] flex items-center justify-center cursor-pointer'>
-                                <GoPlus className='text-whte text-[20px]' />
-                            </span>
-                        </div>
-                        <div className='details pt-[14px]'>
-                            <span className='type text-[#525252] text-[12px]'>Henley T-Shirt</span>
-                            <div className='detail flex justify-between'>
-                                <span className='text-[14px]'>Blurred Print T-Shirt</span>
-                                <span className='price text-[14px]'>$ 70</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className='product w-[305px] h-[313px]'>
-                        <div className="img relative">
-                            <img src={Cloth6} />
-                            <span className='absolute bottom-0 bg-[#dcdcdc9c] w-[34px] h-[34px] right-[45%] flex items-center justify-center cursor-pointer'>
-                                <GoPlus className='text-whte text-[20px]' />
-                            </span>
-                        </div>
-                        <div className='details pt-[14px]'>
-                            <span className='type text-[#525252] text-[12px]'>Crewneek T-Shirt</span>
-                            <div className='detail flex justify-between'>
-                                <span className='text-[14px]'>Full Sleeve Zipper</span>
-                                <span className='price text-[14px]'>$ 89</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <WeekCollection />
+            <YearCollection />
         </div>
     )
 }
