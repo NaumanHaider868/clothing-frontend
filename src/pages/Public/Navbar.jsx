@@ -4,7 +4,7 @@ import '../../assets/css/style.scss'
 export default function Navbar() {
     return (
         <div className='navbar pr-[52px]'>
-            <div className='flex justify-between items-start'>
+            <div className='flex justify-between items-center'>
                 <div className='option-l flex justify-between items-center'>
                     <ul className='web-option'>
                         {/* <li className='action'><span></span></li> */}

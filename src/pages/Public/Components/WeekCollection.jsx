@@ -34,7 +34,7 @@ export default function WeekCollection() {
                     <h1>NEW <br /> THIS WEEK</h1>
                     <p>(50)</p>
                 </div>
-                <span>See All</span>
+                <a className='!text-[16px] text-[#8A8A8A] float-right pt-[45px] cursor-pointer hover:underline'>View All</a>
             </div>
 
             <Swiper

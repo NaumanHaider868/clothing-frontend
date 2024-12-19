@@ -33,8 +33,8 @@ export default function YearCollection() {
                 {products.map((product) => (
                     <div className="product w-[366px]">
                         <div className="img relative">
-                            <img src={product.img} alt={product.name} className="w-full h-[376px] object-cover" />
-                            <span className="absolute bottom-0 bg-[#dcdcdc9c] w-[34px] h-[34px] right-[45%] flex items-center justify-center cursor-pointer">
+                            <img src={product.img} alt={product.name} className="w-full object-cover" />
+                            <span className="absolute bottom-0 bg-[#dcdcdc9c] right-[45%] flex items-center justify-center cursor-pointer">
                                 <GoPlus className="text-white text-[20px]" />
                             </span>
                         </div>
