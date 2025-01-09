@@ -2,7 +2,7 @@ import React from 'react';
 import Img1 from '../../../assets/img/men11.png';
 import Img2 from '../../../assets/img/men12.png';
 import Img3 from '../../../assets/img/men13.png';
-import ProductSidebar from './ProductSidebar';
+import Filter from './Filter';
 
 const categories = ["SHIRTS", "POLO SHIRTS", "BEST SELLERS", "T-SHIRTS", "JEANS", "SHORTS", "JACKETS"];
 const products = [
@@ -52,7 +52,7 @@ export default function Products() {
                 </div>
             </div>
             <div className='product-sidebar'>
-                <ProductSidebar />
+                <Filter />
             </div>
         </div>
     );
