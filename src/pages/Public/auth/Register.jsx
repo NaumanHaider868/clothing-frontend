@@ -1,31 +1,73 @@
-import React from "react";
+import React, { useState } from "react";
 import "../../../assets/css/auth.scss";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import PasswordField from "../shareFiles/PasswordField";
+import { api } from "../../../utlis/customAPI";
+import { toast } from "react-toastify";
+import { formatPlaceholder } from "../../../utlis/formatPlaceholder";
+import Loader from "react-js-loader";
 
-// Yup validation schema
 const schema = yup.object({
-  firstName: yup.string().required("First name is required"),
-  lastName: yup.string().required("Last name is required"),
+  first_name: yup.string().required("First name is required"),
+  last_name: yup.string().required("Last name is required"),
   email: yup
     .string()
     .email("Invalid email address")
     .required("Email is required"),
+  phone: yup
+    .string()
+    .matches(/^\+?[1-9]\d{1,14}$/, "Phone number must be in a valid format")
+    .required("Phone number is required"),
   password: yup
     .string()
-    .min(6, "Password must be at least 6 characters")
-    .required("Password is required"),
+    .min(8, "Password must be at least 8 characters")
+    .required("Password is required")
+    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+    .matches(/[0-9]/, "Password must contain at least one number")
+    .matches(
+      /[@$!%*?&#]/,
+      "Password must contain at least one special character"
+    ),
+  confirm_password: yup
+    .string()
+    .oneOf([yup.ref("password"), null], "Passwords must match")
+    .required("Confirm password is required"),
 });
 
 const Register = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({ resolver: yupResolver(schema) });
-  const onSubmit = (data) => console.log("Form Data:", data);
+
+  const onSubmit = (data) => {
+    setLoading(true);
+    api
+      .post("/auth/register", data)
+      .then((res) => {
+        toast.success(res.data.message);
+        const token = res.data.token;
+        localStorage.setItem("token", token);
+        navigate("/");
+      })
+      .catch((err) => {
+        const errorMessage =
+          err.response?.data?.message || "Something went wrong";
+        toast.error(errorMessage);
+        console.log(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
   return (
     <div className="flex items-center auth register">
@@ -36,47 +78,60 @@ const Register = () => {
       </div>
       <div className="w-full max-w-md p-8 space-y-6 m-auto text-center">
         <h2 className="text-[30px] font-semibold">Create Account</h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {["firstName", "lastName", "email", "password"].map((field, i) => (
-            <div key={i}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {["first_name", "last_name", "email", "phone"].map((field, i) => (
+            <div key={i} className="field-group">
               <input
+                id={field}
                 type={
-                  field === "password"
-                    ? "password"
-                    : field === "email"
+                  field === "email"
                     ? "email"
+                    : field === "phone"
+                    ? "tel"
                     : "text"
                 }
-                placeholder={
-                  errors[field]
-                    ? errors[field].message
-                    : field === "lastName"
-                    ? "Last Name"
-                    : field === "firstName"
-                    ? "First Name"
-                    : field.charAt(0).toUpperCase() + field.slice(1)
-                }
+                placeholder={formatPlaceholder(field)}
                 {...register(field)}
-                className={`w-full px-3 py-4 outline-none bg-transparent b-bottom ${
-                  errors[field]
-                    ? "placeholder-red-500 placeholder-font-bold"
-                    : ""
+                className={`w-full py-4 pl-4 pr-7 rounded-[10px] outline-none bg-transparent input-b ${
+                  errors[field] ? "border-red-500" : ""
                 }`}
               />
-              {/* {errors[field] && (
-                <span className="text-red-500">{errors[field].message}</span>
-              )} */}
+              {errors[field] && (
+                <p className="text-red-500 text-[14px] mt-1 ml-4 text-left">
+                  {errors[field]?.message}
+                </p>
+              )}
             </div>
           ))}
+
+          {[
+            { fieldName: "password", label: "Password" },
+            { fieldName: "confirm_password", label: "Confirm Password" },
+          ].map((item, i) => (
+            <div key={i} className="field-group">
+              <PasswordField
+                fieldName={item.fieldName}
+                label={item.label}
+                register={register}
+                error={errors[item.fieldName]?.message}
+              />
+            </div>
+          ))}
+
           <button
             type="submit"
-            className="w-full py-4 bg-[#D9D9D9] hover:bg-[#c7c5c5] transition-colors duration-300"
+            className="w-full py-4 bg-[#D9D9D9] rounded-[10px] hover:bg-[#c7c5c5] transition-colors duration-300"
+            disabled={loading}
           >
-            Create
+            {loading ? (
+              <Loader type="bubble-spin" bgColor="#000" size={30} />
+            ) : (
+              "Create"
+            )}
           </button>
         </form>
         <p className="text-sm text-center">
-          Already have an account?{" "}
+          Already have an account ?{" "}
           <Link to="/login" className="hover:underline cursor-pointer">
             Login
           </Link>

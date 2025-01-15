@@ -9,6 +9,8 @@ import Checkout from './pages/Public/Components/Checkout';
 import Cart from './pages/Public/Components/Cart';
 import Login from './pages/Public/auth/login';
 import Register from './pages/Public/auth/Register';
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from 'react-toastify';
 
 export default function App() {
   return (
@@ -24,6 +26,7 @@ export default function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
       </Routes>
+      <ToastContainer />
     </>
   )
 }
