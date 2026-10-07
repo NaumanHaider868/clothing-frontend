@@ -15,7 +15,7 @@ import fallback from "../../../assets/img/product1.png";
 
 export default function ViewProduct() {
     const { id } = useParams();
-    const { addItem } = useCart();
+    const { items, addItem } = useCart();
     const { isSaved, toggle } = useSaved();
     const containerRef = useRef(null);
     const [product, setProduct] = useState(null);
@@ -51,6 +51,7 @@ export default function ViewProduct() {
     }, [id]);
 
     const variant = product?.variants?.find((item) => item.id === variantId) || product?.variants?.[0];
+    const inCart = items.some((item) => Number(item.sizeId ?? item.size?.id) === Number(sizeId));
     const images = useMemo(() => {
         const urls = (variant?.images || []).map((image) => mediaUrl(image.imageUrl)).filter(Boolean);
         return urls.length ? urls : [fallback];
@@ -187,8 +188,13 @@ export default function ViewProduct() {
                             </div>
                             {product.modelDetail ? <span className="size-text">{product.modelDetail}</span> : null}
                         </div>
-                        <button type="button" className="product-add" onClick={addToCart} disabled={saving}>
-                            {saving ? "ADDING" : "ADD"}
+                        <button
+                            type="button"
+                            className={`product-add${inCart ? " is-added" : ""}`}
+                            onClick={addToCart}
+                            disabled={saving || inCart}
+                        >
+                            {inCart ? "Added" : saving ? "ADDING" : "ADD"}
                         </button>
                     </div>
                 </div>

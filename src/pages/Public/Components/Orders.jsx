@@ -3,8 +3,10 @@ import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../../../utlis/customAPI";
 import { apiError } from "../../../utlis/apiError";
 import { money } from "../../../utlis/product";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function Orders() {
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const placed = searchParams.get("placed");
   const [orders, setOrders] = useState([]);
@@ -25,12 +27,27 @@ export default function Orders() {
     };
   }, []);
 
+  const name = [user?.firstName, user?.lastName].filter(Boolean).join(" ");
+
   return (
-    <div className="pt-[65px] pr-[52px]">
+    <div className="orders-page pt-[65px] pr-[52px]">
       <h1 className="text-[28px] font-bold tracking-[2px]">YOUR ORDERS</h1>
+      {user ? (
+        <div className="account">
+          {name ? <strong>{name}</strong> : null}
+          <span>{user.email}</span>
+          {user.phone ? <span>{user.phone}</span> : null}
+          {user.address ? <span>{user.address}</span> : null}
+        </div>
+      ) : null}
       {placed ? <p className="pt-4">Order #{placed} is placed. Payment will be collected later.</p> : null}
       {error ? <p className="pt-4">{error}</p> : null}
-      {!error && orders.length === 0 ? <p className="pt-6">You have not placed an order yet.</p> : null}
+      {!error && orders.length === 0 ? (
+        <div className="shop-empty">
+          <p>No orders yet</p>
+          <span>When you place an order, it will show here.</span>
+        </div>
+      ) : null}
       <div className="pt-8 flex flex-col gap-6">
         {orders.map((order) => (
           <div key={order.id} className="border border-[#D9D9D9] p-4">

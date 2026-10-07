@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import footerImg from '../../../assets/img/actions/footerImg.png'
 import logo from '../../../assets/img/actions/logo.png'
 
@@ -11,8 +12,8 @@ export default function Footer() {
                         <span>INFO</span>
                         <ul>
                             <li>PRICING <span className='text-[#C3C3C3]'>/</span></li>
-                            <li>ABOUT <span className='text-[#C3C3C3]'>/</span></li>
-                            <li>CONTACTS</li>
+                            <li><Link to="/about">ABOUT</Link> <span className='text-[#C3C3C3]'>/</span></li>
+                            <li><Link to="/contact">CONTACTS</Link></li>
                         </ul>
                     </div>
                     <div className='languages'>

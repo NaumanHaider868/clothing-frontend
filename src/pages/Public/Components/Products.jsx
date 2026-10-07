@@ -157,7 +157,12 @@ export default function Products() {
                 <div className="shop-grid">
                     {loading ? <p className="shop-note">Loading products...</p> : null}
                     {error ? <p className="shop-note">{error}</p> : null}
-                    {!loading && !error && visible.length === 0 ? <p className="shop-note">No products match this list.</p> : null}
+                    {!loading && !error && visible.length === 0 ? (
+                        <div className="shop-empty">
+                            <p>No products found</p>
+                            <span>Try a different filter.</span>
+                        </div>
+                    ) : null}
                     {rows.map((product) => (
                         <div key={product.id} className="shop-card-wrap">
                             <button
