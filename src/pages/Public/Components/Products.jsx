@@ -2,7 +2,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import Filter from './Filter';
 import { useProducts } from '../../../utlis/useProducts';
-import { coverImage, money, unitPrice } from '../../../utlis/product';
+import { coverImage, unitPrice } from '../../../utlis/product';
+import { Price } from '../../../components/Price';
+import { useSaved } from '../../../context/SavedContext';
+import { CiHeart } from 'react-icons/ci';
+import { FaHeart } from 'react-icons/fa';
 import fallback from '../../../assets/img/cloth1.png';
 
 const BATCH = 10;
@@ -17,12 +21,15 @@ export default function Products() {
     const size = searchParams.get('size') || '';
     const stock = searchParams.get('stock') || '';
     const collection = searchParams.get('collection') || '';
+    const sale = searchParams.get('sale') || '';
+    const { isSaved, toggle } = useSaved();
 
     const { products, loading, error } = useProducts({
         search,
         gender,
         type: season,
         size,
+        onSale: sale === '1' ? 'true' : '',
     });
     const { products: catalog } = useProducts();
 
@@ -41,11 +48,21 @@ export default function Products() {
     const visible = products.filter((product) => {
         const price = unitPrice(product);
         const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
-        const matchesCollection = !collection || product.collection === collection;
+        const collectionGroups = {
+            shirts: ['shirt'],
+            pants: ['pant', 'trouser'],
+            footwear: ['footwear', 'shoe'],
+            accessories: ['accessor'],
+            underwear: ['underwear'],
+            outerwear: ['outerwear', 'jacket', 'coat'],
+        };
+        const collectionName = (product.collection || '').toLowerCase();
+        const collectionTerms = collectionGroups[collection.toLowerCase()] || [collection.toLowerCase()];
+        const matchesCollection = !collection || collectionTerms.some((term) => collectionName.includes(term));
         const matchesStock = !stock || (stock === 'in' ? product.inStock : !product.inStock);
         return matchesPrice && matchesCollection && matchesStock;
     });
-    const filterKey = [search, gender, season, size, stock, collection, priceRange[0], priceRange[1]].join('|');
+    const filterKey = [search, gender, season, size, stock, collection, sale, priceRange[0], priceRange[1]].join('|');
     const [shown, setShown] = useState(BATCH);
     const [seenFilter, setSeenFilter] = useState(filterKey);
     const [loadingMore, setLoadingMore] = useState(false);
@@ -106,7 +123,7 @@ export default function Products() {
                             }}
                         >
                             <h6 className="text-[20px] py-[8px] font-bold">
-                                {gender ? gender.toUpperCase() : 'PRODUCTS'}
+                                {[gender, collection, sale === '1' ? 'sale' : ''].filter(Boolean).join(' ').toUpperCase() || 'PRODUCTS'}
                             </h6>
                             <input
                                 type="text"
@@ -142,21 +159,31 @@ export default function Products() {
                     {error ? <p className="shop-note">{error}</p> : null}
                     {!loading && !error && visible.length === 0 ? <p className="shop-note">No products match this list.</p> : null}
                     {rows.map((product) => (
-                        <Link key={product.id} to={`/product/${product.id}`} className="product shop-card">
-                            <div className="img">
-                                <img
-                                    src={coverImage(product) || fallback}
-                                    alt={product.name}
-                                />
-                            </div>
-                            <div className="details pt-[14px]">
-                                <span className="type text-[#525252] text-[12px]">{product.collection || product.type}</span>
-                                <div className="detail flex justify-between">
-                                    <span className="text-[14px]">{product.name}</span>
-                                    <span className="price text-[14px]">{money(unitPrice(product))}</span>
+                        <div key={product.id} className="shop-card-wrap">
+                            <button
+                                type="button"
+                                className={`save-mark ${isSaved(product.id) ? 'on' : ''}`}
+                                onClick={() => toggle(product)}
+                                aria-label={isSaved(product.id) ? 'Remove from saved' : 'Save product'}
+                            >
+                                {isSaved(product.id) ? <FaHeart /> : <CiHeart className="text-[20px]" />}
+                            </button>
+                            <Link to={`/product/${product.id}`} className="product shop-card">
+                                <div className="img">
+                                    <img
+                                        src={coverImage(product) || fallback}
+                                        alt={product.name}
+                                    />
                                 </div>
-                            </div>
-                        </Link>
+                                <div className="details pt-[14px]">
+                                    <span className="type text-[#525252] text-[12px]">{product.collection || product.type}</span>
+                                    <div className="detail flex justify-between gap-2">
+                                        <span className="text-[14px]">{product.name}</span>
+                                        <Price product={product} />
+                                    </div>
+                                </div>
+                            </Link>
+                        </div>
                     ))}
                 </div>
                 {hasMore ? (
@@ -173,9 +200,11 @@ export default function Products() {
                     size={size}
                     stock={stock}
                     priceRange={priceRange}
+                    sale={sale}
                     onSeason={(value) => setParam('season', value)}
                     onSize={(value) => setParam('size', value)}
                     onStock={(value) => setParam('stock', value)}
+                    onSale={(value) => setParam('sale', value)}
                     onPrice={setPriceRange}
                 />
             </div>

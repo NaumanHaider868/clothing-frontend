@@ -49,7 +49,11 @@ export default function Cart() {
                                     </div>
                                     <div className='price'>
                                         <span>{item.product.name}</span>
-                                        <span>{money(lineTotal(item))}</span>
+                                        <span className={item.product.onSale ? 'price is-sale' : ''}>
+                                            {item.product.onSale ? <span className="was">{money(Number(item.product.price) * item.quantity)}</span> : null}
+                                            <span className="now">{money(lineTotal(item))}</span>
+                                            {item.product.onSale ? <span className="sale-tag">Sale</span> : null}
+                                        </span>
                                     </div>
                                 </div>
                                 <div className="action">

@@ -10,10 +10,12 @@ export default function Filter({
     size,
     stock,
     priceRange,
+    sale,
     onSeason,
     onSize,
     onStock,
     onPrice,
+    onSale,
 }) {
     const [openSections, setOpenSections] = useState(['seasons']);
 
@@ -26,6 +28,16 @@ export default function Filter({
     return (
         <div className="sidebar">
             <span className="text-[16px] font-medium">Filters</span>
+
+            <div className="sizes">
+                <button
+                    type="button"
+                    onClick={() => onSale(sale ? '' : '1')}
+                    className={`mt-3 px-3 py-1 border cursor-pointer ${sale ? 'bg-black text-white' : ''}`}
+                >
+                    On sale
+                </button>
+            </div>
 
             <div className="sizes">
                 <span>Size</span>

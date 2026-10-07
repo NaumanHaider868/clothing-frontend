@@ -3,16 +3,20 @@ import { useParams } from "react-router-dom";
 import "react-image-lightbox/style.css";
 import Lightbox from "react-image-lightbox";
 import { CiHeart } from "react-icons/ci";
+import { FaHeart } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { api } from "../../../utlis/customAPI";
 import { apiError } from "../../../utlis/apiError";
-import { mediaUrl, money, unitPrice } from "../../../utlis/product";
+import { mediaUrl } from "../../../utlis/product";
+import { Price } from "../../../components/Price";
 import { useCart } from "../../../context/CartContext";
+import { useSaved } from "../../../context/SavedContext";
 import fallback from "../../../assets/img/product1.png";
 
 export default function ViewProduct() {
     const { id } = useParams();
     const { addItem } = useCart();
+    const { isSaved, toggle } = useSaved();
     const containerRef = useRef(null);
     const [product, setProduct] = useState(null);
     const [error, setError] = useState("");
@@ -125,14 +129,19 @@ export default function ViewProduct() {
             </div>
             <div className="right">
                 <div className="flex justify-end">
-                    <span className="like w-[34px] h-[34px] bg-white flex items-center justify-center">
-                        <CiHeart className="text-[24px]" />
-                    </span>
+                    <button
+                        type="button"
+                        className={`like w-[34px] h-[34px] bg-white flex items-center justify-center ${isSaved(product.id) ? "on" : ""}`}
+                        onClick={() => toggle(product)}
+                        aria-label={isSaved(product.id) ? "Remove from saved" : "Save product"}
+                    >
+                        {isSaved(product.id) ? <FaHeart className="text-[18px]" /> : <CiHeart className="text-[24px]" />}
+                    </button>
                 </div>
                 <div className="product-detail">
                     <div className="top">
                         <span className="heading">{product.name}</span>
-                        <span className="price">{money(unitPrice(product))}</span>
+                        <Price product={product} />
                         <span className="tax">MRP incl. of all taxes</span>
                     </div>
                     <div className="desc">
