@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import Footer from './Footer';
 import arrowLeftLong from '../../../assets/img/actions/big-arrow-left.png';
-import Image from '../../../assets/img/product1.png';
-import Image2 from '../../../assets/img/men23.png';
+import fallback from '../../../assets/img/product1.png';
+import { useAuth } from '../../../context/AuthContext';
+import { useCart } from '../../../context/CartContext';
+import { api } from '../../../utlis/customAPI';
+import { apiError } from '../../../utlis/apiError';
+import { lineTotal, money, variantImage } from '../../../utlis/product';
 
 const ProductItem = ({ imgSrc, title, price, colorSize, count }) => (
     <div className="item">
-        <div className="img cursor-pointer">
+        <div className="img">
             <img src={imgSrc} className="w-full h-full" alt={title} />
         </div>
         <div className="content">
@@ -19,13 +25,50 @@ const ProductItem = ({ imgSrc, title, price, colorSize, count }) => (
             </div>
             <div className="action flex justify-between">
                 <span className="count">({count})</span>
-                <a className="link">Change</a>
+                <Link to="/cart" className="link">Change</Link>
             </div>
         </div>
     </div>
 );
 
 export default function Checkout() {
+    const navigate = useNavigate();
+    const { user } = useAuth();
+    const { items, refresh, ready } = useCart();
+    const [saving, setSaving] = useState(false);
+    const [form, setForm] = useState({
+        firstName: user?.firstName || '',
+        lastName: user?.lastName || '',
+        phone: user?.phone || '',
+        address: user?.address || '',
+    });
+    const subtotal = items.reduce((sum, item) => sum + lineTotal(item), 0);
+
+    const update = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
+
+    const placeOrder = async () => {
+        if (!items.length) {
+            toast.error("Your cart is empty");
+            return;
+        }
+        if (!form.firstName.trim() || !form.lastName.trim() || !form.phone.trim() || !form.address.trim()) {
+            toast.error("Add your contact details and address");
+            return;
+        }
+        setSaving(true);
+        try {
+            await api.patch('/auth/profile', form);
+            const response = await api.post('/order/checkout');
+            await refresh();
+            toast.success(response.data.message);
+            navigate(`/orders?placed=${response.data.data.id}`);
+        } catch (error) {
+            toast.error(apiError(error, "Could not place the order"));
+        } finally {
+            setSaving(false);
+        }
+    };
+
     return (
         <>
             <div className="main-section h-auto overflow-hidden">
@@ -33,7 +76,7 @@ export default function Checkout() {
                     <section className="flex h-full">
                         <div className="checkout">
                             <div className="header">
-                                <img src={arrowLeftLong} className="cursor-pointer" alt="Back" />
+                                <img src={arrowLeftLong} className="cursor-pointer" alt="Back" onClick={() => navigate('/cart')} />
                             </div>
                             <div className="content">
                                 <div className="content-head">
@@ -43,8 +86,7 @@ export default function Checkout() {
                                     <div className="according">
                                         <ul>
                                             <li className="active">INFORMATION</li>
-                                            <li>SHIPPING</li>
-                                            <li>PAYMENT</li>
+                                            <li>ORDER</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -52,71 +94,53 @@ export default function Checkout() {
                                     <div className="left">
                                         <div className="contact">
                                             <label>CONTACT INFO</label>
-                                            <input type="email" className="input" placeholder="Email" />
-                                            <input type="phone" className="input" placeholder="Phone" />
+                                            <input type="email" className="input" value={user?.email || ''} readOnly />
+                                            <input type="tel" className="input" placeholder="Phone" value={form.phone} onChange={update('phone')} />
                                         </div>
                                         <div className="shipping">
                                             <label>SHIPPING ADDRESS</label>
                                             <div className="flex gap-3">
-                                                <input type="text" placeholder="First Name" />
-                                                <input type="text" placeholder="Last Name" />
+                                                <input type="text" placeholder="First Name" value={form.firstName} onChange={update('firstName')} />
+                                                <input type="text" placeholder="Last Name" value={form.lastName} onChange={update('lastName')} />
                                             </div>
-                                            <select>
-                                                <option value="Pakistan">Pakistan</option>
-                                                <option value="India">India</option>
-                                                <option value="Bangladesh">Bangladesh</option>
-                                            </select>
-                                            <input type="text" placeholder="State/Region" />
-                                            <input type="text" placeholder="Address" />
-                                            <div className="flex gap-3">
-                                                <input type="text" placeholder="City" />
-                                                <input type="text" placeholder="Postal Code" />
-                                            </div>
+                                            <input type="text" placeholder="Address" value={form.address} onChange={update('address')} />
                                         </div>
                                         <div className="order">
-                                            <div className="w-full"></div>
-                                            <button>
-                                                Shipping <i className="icon"></i>
+                                            <p className="text-[13px] pb-3">Payment is added later. Placing the order reserves these items.</p>
+                                            <button type="button" onClick={placeOrder} disabled={saving || !ready || !items.length}>
+                                                {saving ? 'Placing...' : 'Place order'}
                                             </button>
                                         </div>
                                     </div>
                                     <div className="right">
                                         <div className="flex justify-end">
                                             <span className="like w-[34px] h-[34px] bg-white text-[#000E8A] text-[16px] font-semibold flex items-center justify-center">
-                                                ( 2 )
+                                                ( {items.reduce((sum, item) => sum + item.quantity, 0)} )
                                             </span>
                                         </div>
                                         <div className="products">
                                             <h4 className="head">YOUR ORDER</h4>
                                             <div className="mt-[20px] flex flex-col gap-5">
-                                                <ProductItem
-                                                    imgSrc={Image}
-                                                    title="Basic Heavy T-Shirt"
-                                                    price="$99"
-                                                    colorSize="Black / Large"
-                                                    count="1"
-                                                />
-                                                <ProductItem
-                                                    imgSrc={Image2}
-                                                    title="Basic Heavy T-Shirt"
-                                                    price="$99"
-                                                    colorSize="Black / Large"
-                                                    count="1"
-                                                />
+                                                {items.map((item) => (
+                                                    <ProductItem
+                                                        key={item.id}
+                                                        imgSrc={variantImage(item.variant) || fallback}
+                                                        title={item.product.name}
+                                                        price={money(lineTotal(item))}
+                                                        colorSize={`${item.variant.color} / ${item.size.size}`}
+                                                        count={item.quantity}
+                                                    />
+                                                ))}
                                             </div>
                                             <div className='sub-total'>
                                                 <div className="total">
                                                     <span>Subtotal</span>
-                                                    <span>$180.00</span>
-                                                </div>
-                                                <div className="shipping">
-                                                    <span>Shipping</span>
-                                                    <span className='next'>Calculated at next step</span>
+                                                    <span>{money(subtotal)}</span>
                                                 </div>
                                             </div>
                                             <div className="total">
                                                 <span>Total</span>
-                                                <span>$180.00</span>
+                                                <span>{money(subtotal)}</span>
                                             </div>
                                         </div>
                                     </div>
