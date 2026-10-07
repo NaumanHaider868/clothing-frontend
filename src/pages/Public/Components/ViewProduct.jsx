@@ -1,60 +1,109 @@
-import React, { useRef, useEffect, useState } from "react";
-import Image1 from "../../../assets/img/product1.png";
-import Image2 from "../../../assets/img/product2.png";
-import Image3 from "../../../assets/img/product3.png";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import "react-image-lightbox/style.css";
 import Lightbox from "react-image-lightbox";
 import { CiHeart } from "react-icons/ci";
-
-const images = [Image1, Image2, Image3];
+import { toast } from "react-toastify";
+import { api } from "../../../utlis/customAPI";
+import { apiError } from "../../../utlis/apiError";
+import { mediaUrl, money, unitPrice } from "../../../utlis/product";
+import { useCart } from "../../../context/CartContext";
+import fallback from "../../../assets/img/product1.png";
 
 export default function ViewProduct() {
+    const { id } = useParams();
+    const { addItem } = useCart();
     const containerRef = useRef(null);
+    const [product, setProduct] = useState(null);
+    const [error, setError] = useState("");
     const [progress, setProgress] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [variantId, setVariantId] = useState(null);
+    const [sizeId, setSizeId] = useState(null);
+    const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        let active = true;
+        setProduct(null);
+        setError("");
+        api
+            .get(`/product/fetch/${id}`)
+            .then((response) => {
+                if (!active) return;
+                const next = response.data.data;
+                setProduct(next);
+                const variant = next.variants?.[0];
+                setVariantId(variant?.id ?? null);
+                const size = variant?.sizes?.find((item) => item.stockCount > 0) || variant?.sizes?.[0];
+                setSizeId(size?.id ?? null);
+            })
+            .catch((err) => {
+                if (active) setError(apiError(err, "Product not found"));
+            });
+        return () => {
+            active = false;
+        };
+    }, [id]);
+
+    const variant = product?.variants?.find((item) => item.id === variantId) || product?.variants?.[0];
+    const images = useMemo(() => {
+        const urls = (variant?.images || []).map((image) => mediaUrl(image.imageUrl)).filter(Boolean);
+        return urls.length ? urls : [fallback];
+    }, [variant]);
 
     useEffect(() => {
         const container = containerRef.current;
+        if (!container) return undefined;
 
         const updateProgress = () => {
-            const scrollPosition = container.scrollTop;
-            const maxScroll = container.scrollHeight - container.clientHeight;
-            const progressPercentage = ((scrollPosition + container.clientHeight) / container.scrollHeight) * 100;
-            setProgress(progressPercentage);
+            const progressPercentage = ((container.scrollTop + container.clientHeight) / container.scrollHeight) * 100;
+            setProgress(progressPercentage || 0);
         };
 
-        const calculateInitialProgress = () => {
-            const firstImageHeight = container?.querySelector("img")?.clientHeight || 0;
-            if (container.scrollHeight > 0) {
-                setProgress((firstImageHeight / container.scrollHeight) * 100);
-            }
-        };
-
-        calculateInitialProgress();
+        updateProgress();
         container.addEventListener("scroll", updateProgress);
-
         return () => container.removeEventListener("scroll", updateProgress);
-    }, []);
+    }, [images]);
 
-    const openLightbox = (index) => {
-        setCurrentImageIndex(index);
-        setIsOpen(true);
+    const selectVariant = (next) => {
+        setVariantId(next.id);
+        setCurrentImageIndex(0);
+        const size = next.sizes?.find((item) => item.stockCount > 0) || next.sizes?.[0];
+        setSizeId(size?.id ?? null);
     };
 
-    const closeLightbox = () => setIsOpen(false);
-
-    const moveNext = () => {
-        if (currentImageIndex < images.length - 1) {
-            setCurrentImageIndex((currentImageIndex + 1) % images.length);
+    const addToCart = async () => {
+        const size = variant?.sizes?.find((item) => item.id === sizeId);
+        if (!variant || !size) {
+            toast.error("Choose a size");
+            return;
+        }
+        setSaving(true);
+        try {
+            await addItem({
+                productId: product.id,
+                variantId: variant.id,
+                sizeId: size.id,
+                quantity: 1,
+                product,
+                variant,
+                size,
+            });
+            toast.success("Added to cart");
+        } catch (err) {
+            toast.error(err?.response ? apiError(err, "Could not add this product") : err.message);
+        } finally {
+            setSaving(false);
         }
     };
 
-    const movePrev = () => {
-        if (currentImageIndex > 0) {
-            setCurrentImageIndex((currentImageIndex + images.length - 1) % images.length);
-        }
-    };
+    if (error) {
+        return <div className="view-product p-10">{error}</div>;
+    }
+    if (!product) {
+        return <div className="view-product p-10">Loading...</div>;
+    }
 
     return (
         <div className="view-product">
@@ -62,10 +111,13 @@ export default function ViewProduct() {
                 <div className="left" ref={containerRef}>
                     {images.map((image, index) => (
                         <img
-                            key={index}
+                            key={`${image}-${index}`}
                             src={image}
-                            alt={`Product ${index + 1}`}
-                            onClick={() => openLightbox(index)}
+                            alt={product.name}
+                            onClick={() => {
+                                setCurrentImageIndex(index);
+                                setIsOpen(true);
+                            }}
                         />
                     ))}
                 </div>
@@ -79,41 +131,56 @@ export default function ViewProduct() {
                 </div>
                 <div className="product-detail">
                     <div className="top">
-                        <span className="heading">ABSTRACT PRINT SHIRT</span>
-                        <span className="price">$99</span>
-                        <span className="tax">
-                            MRP incl. of all taxes
-                        </span>
+                        <span className="heading">{product.name}</span>
+                        <span className="price">{money(unitPrice(product))}</span>
+                        <span className="tax">MRP incl. of all taxes</span>
                     </div>
                     <div className="desc">
-                        <span>
-                            Relaxed-fit shirt. Camp collar and short seleevs. Button-up front.
-                        </span>
+                        <span>{product.description}</span>
                     </div>
                     <div className="bottom">
                         <div className="colors">
                             <span>Color</span>
                             <div className="detail">
-                                <div className="color bg-[#B9C1E8]"></div>
-                                <div className="color bg-[#ffc65c]"></div>
-                                <div className="color bg-[#1E1E1E]"></div>
-                                <div className="color bg-[#A9A9A9]"></div>
-                                <div className="color bg-[#D9D9D9]"></div>
-                                <div className="color bg-[#A6D6CA]"></div>
+                                {(product.variants || []).map((item) => (
+                                    <button
+                                        key={item.id}
+                                        type="button"
+                                        className="color"
+                                        onClick={() => selectVariant(item)}
+                                        style={{
+                                            background: item.color,
+                                            outline: item.id === variant?.id ? "2px solid #000" : "none",
+                                        }}
+                                    />
+                                ))}
                             </div>
                         </div>
                         <div className="sizes">
                             <span>Size</span>
                             <div className="detail">
-                                {['XS', 'S', 'M', 'L', 'XL', '2X'].map((size) => (
-                                    <div key={size} className="size">
-                                        {size}
-                                    </div>
+                                {(variant?.sizes || []).map((item) => (
+                                    <button
+                                        key={item.id}
+                                        type="button"
+                                        className="size"
+                                        disabled={item.stockCount < 1}
+                                        onClick={() => setSizeId(item.id)}
+                                        style={{
+                                            background: item.id === sizeId ? "#000" : undefined,
+                                            color: item.id === sizeId ? "#fff" : undefined,
+                                            opacity: item.stockCount < 1 ? 0.35 : 1,
+                                        }}
+                                    >
+                                        {item.size}
+                                    </button>
                                 ))}
                             </div>
-                            <span className="size-text">FIND YOUR SIZE | MEASUREMENT GUIDE</span>
+                            {product.modelDetail ? <span className="size-text">{product.modelDetail}</span> : null}
                         </div>
-                        <button className="product-add">ADD</button>
+                        <button type="button" className="product-add" onClick={addToCart} disabled={saving}>
+                            {saving ? "ADDING" : "ADD"}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -123,13 +190,9 @@ export default function ViewProduct() {
                     mainSrc={images[currentImageIndex]}
                     nextSrc={currentImageIndex < images.length - 1 ? images[currentImageIndex + 1] : null}
                     prevSrc={currentImageIndex > 0 ? images[currentImageIndex - 1] : null}
-                    onCloseRequest={closeLightbox}
-                    onMovePrevRequest={movePrev}
-                    onMoveNextRequest={moveNext}
-                    nextLabel={currentImageIndex < images.length - 1 ? "Next" : undefined}
-                    prevLabel={currentImageIndex > 0 ? "Previous" : undefined}
-                    nextSrcDisabled={currentImageIndex >= images.length - 1}
-                    prevSrcDisabled={currentImageIndex <= 0}
+                    onCloseRequest={() => setIsOpen(false)}
+                    onMovePrevRequest={() => setCurrentImageIndex((index) => Math.max(0, index - 1))}
+                    onMoveNextRequest={() => setCurrentImageIndex((index) => Math.min(images.length - 1, index + 1))}
                 />
             )}
         </div>
