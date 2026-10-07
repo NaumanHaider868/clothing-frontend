@@ -1,26 +1,30 @@
-import React from 'react'
-import image from '../../../assets/img/men3.png'
-import image1 from '../../../assets/img/men11.png'
-import image2 from '../../../assets/img/men12.png'
-import image3 from '../../../assets/img/men14.png'
+import { Link } from "react-router-dom";
+import { GENDERS } from "../../../utlis/shopMenu";
 
 export default function Approach() {
     return (
-        <div className='pt-[150px] approach'>
-            <div className='heading flex flex-col items-center text-center pr-[52px]'>
-                <h1 className='text-[48px] tracking-[2px] leading-[40px]'>
-                    OUR APPROACH TO FASHION DESIN
-                </h1>
-                <p className='text-[16px] pt-[10px] font-extralight max-w-[49rem]'>at elegant vogue, we blend creativity with craftsmanship to create fashion that transcends trends and stands the test of time. Each design is meticulously crafted, ensuring the highest quality exquisite finish.</p>
+        <section className="departments">
+            <h2>Shop</h2>
+            <div className="tiles">
+                {GENDERS.map((gender) => (
+                    <div className="tile-block" key={gender.value}>
+                        <Link to={`/products?gender=${gender.value}`} className="tile">
+                            <img src={gender.image} alt="" />
+                            <span>{gender.label}</span>
+                        </Link>
+                        <div className="cats">
+                            {gender.categories.map((category) => (
+                                <Link
+                                    key={category}
+                                    to={`/products?gender=${gender.value}&collection=${encodeURIComponent(category)}`}
+                                >
+                                    {category}
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                ))}
             </div>
-            <div className="content pt-[100px]">
-                <div className='flex items-center justify-between'>
-                    <img src={image} className='w-[293px] h-[389px]' />
-                    <img src={image1} className='w-[293px] h-[389px] mt-[100px]' />
-                    <img src={image2} className='w-[293px] h-[389px]' />
-                    <img src={image3} className='w-[293px] h-[389px] mt-[100px]' />
-                </div>
-            </div>
-        </div>
-    )
+        </section>
+    );
 }

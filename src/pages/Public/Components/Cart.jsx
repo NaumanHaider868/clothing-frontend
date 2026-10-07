@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../context/AuthContext'
 import { IoMdClose } from "react-icons/io";
 import { GoPlus } from "react-icons/go";
@@ -43,12 +43,12 @@ export default function Cart() {
                         {items.map((item) => (
                             <div className="product" key={item.id}>
                                 <div className='detail'>
-                                    <div className="image">
+                                    <Link to={`/product/${item.product.id}`} className="image">
                                         <img src={variantImage(item.variant) || fallback} alt={item.product.name} />
                                         <span>{item.product.collection || item.product.type}</span>
-                                    </div>
+                                    </Link>
                                     <div className='price'>
-                                        <span>{item.product.name}</span>
+                                        <Link to={`/product/${item.product.id}`}>{item.product.name}</Link>
                                         <span className={item.product.onSale ? 'price is-sale' : ''}>
                                             {item.product.onSale ? <span className="was">{money(Number(item.product.price) * item.quantity)}</span> : null}
                                             <span className="now">{money(lineTotal(item))}</span>
