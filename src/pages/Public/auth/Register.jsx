@@ -6,13 +6,14 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import PasswordField from "../shareFiles/PasswordField";
 import { api } from "../../../utlis/customAPI";
+import { apiError } from "../../../utlis/apiError";
 import { toast } from "react-toastify";
 import { formatPlaceholder } from "../../../utlis/formatPlaceholder";
 import Loader from "react-js-loader";
 
 const schema = yup.object({
-  first_name: yup.string().required("First name is required"),
-  last_name: yup.string().required("Last name is required"),
+  firstName: yup.string().required("First name is required"),
+  lastName: yup.string().required("Last name is required"),
   email: yup
     .string()
     .email("Invalid email address")
@@ -50,19 +51,21 @@ const Register = () => {
 
   const onSubmit = (data) => {
     setLoading(true);
+    const payload = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      phone: data.phone,
+      password: data.password,
+    };
     api
-      .post("/auth/register", data)
+      .post("/auth/register", payload)
       .then((res) => {
         toast.success(res.data.message);
-        const token = res.data.token;
-        localStorage.setItem("token", token);
-        navigate("/");
+        navigate("/login");
       })
       .catch((err) => {
-        const errorMessage =
-          err.response?.data?.message || "Something went wrong";
-        toast.error(errorMessage);
-        console.log(err);
+        toast.error(apiError(err));
       })
       .finally(() => {
         setLoading(false);
@@ -79,7 +82,7 @@ const Register = () => {
       <div className="w-full max-w-md p-8 space-y-6 m-auto text-center">
         <h2 className="text-[30px] font-semibold">Create Account</h2>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {["first_name", "last_name", "email", "phone"].map((field, i) => (
+          {["firstName", "lastName", "email", "phone"].map((field, i) => (
             <div key={i} className="field-group">
               <input
                 id={field}

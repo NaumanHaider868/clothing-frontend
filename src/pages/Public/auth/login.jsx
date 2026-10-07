@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import "../../../assets/css/auth.scss";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { api } from "../../../utlis/customAPI";
+import { apiError } from "../../../utlis/apiError";
 import { toast } from "react-toastify";
 import PasswordField from "../shareFiles/PasswordField";
 import Loader from "react-js-loader";
+import { useAuth } from "../../../context/AuthContext";
 
 const schema = yup.object({
   email: yup
@@ -22,7 +24,11 @@ const schema = yup.object({
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login, user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+  const next = searchParams.get("next") || "/";
+  const destination = next.startsWith("/") ? next : "/";
   const {
     register,
     handleSubmit,
@@ -35,20 +41,18 @@ const Login = () => {
       .post("/auth/login", data)
       .then((res) => {
         toast.success(res.data.message);
-        const token = res.data.token;
-        localStorage.setItem("token", token);
-        navigate("/");
+        login(res.data.data.user, res.data.data.token);
+        navigate(destination);
       })
       .catch((err) => {
-        const errorMessage =
-          err.response?.data?.message || "Something went wrong";
-        toast.error(errorMessage);
-        console.log(err);
+        toast.error(apiError(err));
       })
       .finally(() => {
         setLoading(false);
       });
   };
+
+  if (user) return <Navigate to={destination} replace />;
 
   return (
     <div className="flex items-center auth login">
