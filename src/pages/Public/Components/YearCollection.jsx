@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom';
 import { GoPlus } from 'react-icons/go';
-import { coverImage, money, unitPrice } from '../../../utlis/product';
+import { coverImage, unitPrice } from '../../../utlis/product';
+import { Price } from '../../../components/Price';
 import fallback from '../../../assets/img/cloth1.png';
 
 const GROUPS = [
@@ -57,7 +58,7 @@ export default function YearCollection({ products = [] }) {
                             <span className="type text-[#525252] text-[12px]">{product.collection || product.type}</span>
                             <div className="detail flex justify-between">
                                 <span className="text-[14px]">{product.name}</span>
-                                <span className="price text-[14px]">{money(unitPrice(product))}</span>
+                                <Price product={product} />
                             </div>
                         </div>
                     </Link>
