@@ -1,55 +1,70 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { Link } from 'react-router-dom';
 import { GoPlus } from 'react-icons/go';
-import Cloth4 from '../../../assets/img/cloth4.png';
-import Cloth6 from '../../../assets/img/cloth6.png';
-import Cloth2 from '../../../assets/img/cloth2.png';
+import { coverImage, money, unitPrice } from '../../../utlis/product';
+import fallback from '../../../assets/img/cloth1.png';
 
-export default function YearCollection() {
-    const products = [
-        { id: 1, img: Cloth6, type: "Crewneck T-Shirt", name: "Full Sleeve Zipper", price: "$89" },
-        { id: 2, img: Cloth2, type: "V-Neck T-Shirt", name: "Embroidered Seersucker Shirt", price: "$99" },
-        { id: 3, img: Cloth4, type: "V-Neck T-Shirt", name: "Embroidered Seersucker Shirt", price: "$99" },
-    ];
+const GROUPS = [
+    { label: '(All)', value: '' },
+    { label: 'Men', value: 'men' },
+    { label: 'Women', value: 'women' },
+    { label: 'KID', value: 'kids' },
+];
+
+export default function YearCollection({ products = [] }) {
+    const [gender, setGender] = useState('');
+    const [sort, setSort] = useState('asc');
+    const visible = products
+        .filter((product) => !gender || product.gender === gender)
+        .slice()
+        .sort((a, b) => (sort === 'asc' ? unitPrice(a) - unitPrice(b) : unitPrice(b) - unitPrice(a)))
+        .slice(0, 3);
+
     return (
         <div className='pt-[100px] year-collections pr-[52px]'>
             <div className='collection-head'>
                 <h1 className='text-[48px] font-bold leading-[40px] tracking-[2px]'>XIV<br />COLLECTIONS<br />23-24</h1>
                 <div className='collection-accordion'>
                     <ul>
-                        <li className='active'>(All)</li>
-                        <li>Men</li>
-                        <li>Women</li>
-                        <li>KID</li>
+                        {GROUPS.map((group) => (
+                            <li
+                                key={group.label}
+                                className={gender === group.value ? 'active' : ''}
+                                onClick={() => setGender(group.value)}
+                            >
+                                {group.label}
+                            </li>
+                        ))}
                     </ul>
                     <div className="sort">
                         <p>Sort(-)</p>
-                        <span className='text-[#8A8A8A]'>Less to more</span>
+                        <button type="button" className='text-[#8A8A8A]' onClick={() => setSort('asc')}>Less to more</button>
                         <br />
-                        <span className='text-[#8A8A8A]'>More to less</span>
+                        <button type="button" className='text-[#8A8A8A]' onClick={() => setSort('desc')}>More to less</button>
                     </div>
                 </div>
             </div>
             <div className="products pt-[30px] flex justify-between">
-                {products.map((product) => (
-                    <div className="product w-[366px]">
+                {visible.map((product) => (
+                    <Link key={product.id} to={`/product/${product.id}`} className="product w-[366px]">
                         <div className="img relative">
-                            <img src={product.img} alt={product.name} className="w-full object-cover" />
+                            <img src={coverImage(product) || fallback} alt={product.name} className="w-full object-cover" />
                             <span className="absolute bottom-0 bg-[#dcdcdc9c] right-[45%] flex items-center justify-center cursor-pointer">
                                 <GoPlus className="text-white text-[20px]" />
                             </span>
                         </div>
                         <div className="details pt-[14px]">
-                            <span className="type text-[#525252] text-[12px]">{product.type}</span>
+                            <span className="type text-[#525252] text-[12px]">{product.collection || product.type}</span>
                             <div className="detail flex justify-between">
                                 <span className="text-[14px]">{product.name}</span>
-                                <span className="price text-[14px]">{product.price}</span>
+                                <span className="price text-[14px]">{money(unitPrice(product))}</span>
                             </div>
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
 
-            <a className='text-[#8A8A8A] float-right pt-[45px] cursor-pointer hover:underline'>View All</a>
+            <Link to={gender ? `/products?gender=${gender}` : '/products'} className='text-[#8A8A8A] float-right pt-[45px] cursor-pointer hover:underline'>View All</Link>
         </div>
     )
 }
