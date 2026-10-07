@@ -14,18 +14,22 @@ import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from 'react-toastify';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { SavedProvider } from './context/SavedContext';
+import Saved from './pages/Public/Components/Saved';
 import ProtectedRoute from './components/ProtectedRoute';
 
 export default function App() {
   return (
     <AuthProvider>
       <CartProvider>
+      <SavedProvider>
         <Routes>
           <Route path="/" element={<MainLayout />}>
             <Route path='/' element={<Collection />} />
             <Route path='/products' element={<Products />} />
             <Route path='/product/:id' element={<ViewProduct />} />
             <Route path='/cart' element={<Cart />} />
+            <Route path='/saved' element={<Saved />} />
             <Route path='/orders' element={<ProtectedRoute><Orders /></ProtectedRoute>} />
           </Route>
           <Route path='/checkout' element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
@@ -34,6 +38,7 @@ export default function App() {
           <Route path='/verify-email' element={<VerifyEmail />} />
         </Routes>
         <ToastContainer />
+      </SavedProvider>
       </CartProvider>
     </AuthProvider>
   )

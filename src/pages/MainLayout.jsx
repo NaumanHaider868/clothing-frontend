@@ -8,7 +8,7 @@ function MainLayout() {
 
     return (
         <>
-            <div className={`main-section h-auto overflow-hidden`}>
+            <div className={`main-section h-auto overflow-x-clip`}>
                 <div className={`w-full`}>
                     <Navbar />
                     <section className="flex h-full">
