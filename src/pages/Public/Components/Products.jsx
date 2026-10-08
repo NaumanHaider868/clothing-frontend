@@ -15,6 +15,7 @@ export default function Products() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [draft, setDraft] = useState(searchParams.get('search') || '');
     const [priceRange, setPriceRange] = useState([0, 1000]);
+    const [filterOpen, setFilterOpen] = useState(false);
     const search = searchParams.get('search') || '';
     const gender = searchParams.get('gender') || '';
     const season = searchParams.get('season') || '';
@@ -106,6 +107,39 @@ export default function Products() {
         setSearchParams(next);
     };
 
+    const priceOn = priceRange[0] !== 0 || priceRange[1] !== 1000;
+    const activeFilters = [season, size, stock, sale, priceOn ? 'price' : ''].filter(Boolean).length;
+
+    const clearFilters = () => {
+        const next = new URLSearchParams(searchParams);
+        ['season', 'size', 'stock', 'sale'].forEach((key) => next.delete(key));
+        setSearchParams(next);
+        setPriceRange([0, 1000]);
+    };
+
+    useEffect(() => {
+        if (!filterOpen) return undefined;
+        const previous = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        const onKey = (event) => {
+            if (event.key === 'Escape') setFilterOpen(false);
+        };
+        window.addEventListener('keydown', onKey);
+        return () => {
+            document.body.style.overflow = previous;
+            window.removeEventListener('keydown', onKey);
+        };
+    }, [filterOpen]);
+
+    useEffect(() => {
+        const media = window.matchMedia('(min-width: 1101px)');
+        const closeDrawer = () => {
+            if (media.matches) setFilterOpen(false);
+        };
+        media.addEventListener('change', closeDrawer);
+        return () => media.removeEventListener('change', closeDrawer);
+    }, []);
+
     return (
         <div className="products shop-page pt-[65px] pr-[52px]">
             <div className="shop-main">
@@ -154,6 +188,9 @@ export default function Products() {
                         ))}
                     </div>
                 </div>
+                <button type="button" className="shop-filter-toggle" onClick={() => setFilterOpen(true)}>
+                    Filter{activeFilters ? ` (${activeFilters})` : ''}
+                </button>
                 <div className="shop-grid">
                     {loading ? <p className="shop-note">Loading products...</p> : null}
                     {error ? <p className="shop-note">{error}</p> : null}
@@ -178,6 +215,8 @@ export default function Products() {
                                     <img
                                         src={coverImage(product) || fallback}
                                         alt={product.name}
+                                        loading="lazy"
+                                        decoding="async"
                                     />
                                 </div>
                                 <div className="details pt-[14px]">
@@ -198,7 +237,10 @@ export default function Products() {
                     </div>
                 ) : null}
             </div>
-            <div className='product-sidebar'>
+            {filterOpen ? (
+                <button type="button" className="shop-filter-backdrop" aria-label="Close filters" onClick={() => setFilterOpen(false)} />
+            ) : null}
+            <div className={`product-sidebar ${filterOpen ? 'is-open' : ''}`}>
                 <Filter
                     seasons={seasons}
                     season={season}
@@ -211,6 +253,8 @@ export default function Products() {
                     onStock={(value) => setParam('stock', value)}
                     onSale={(value) => setParam('sale', value)}
                     onPrice={setPriceRange}
+                    onClear={clearFilters}
+                    onClose={() => setFilterOpen(false)}
                 />
             </div>
         </div>

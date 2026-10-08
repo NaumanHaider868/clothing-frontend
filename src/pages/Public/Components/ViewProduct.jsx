@@ -119,6 +119,8 @@ export default function ViewProduct() {
                             key={`${image}-${index}`}
                             src={image}
                             alt={product.name}
+                            loading={index === 0 ? 'eager' : 'lazy'}
+                            decoding="async"
                             onClick={() => {
                                 setCurrentImageIndex(index);
                                 setIsOpen(true);

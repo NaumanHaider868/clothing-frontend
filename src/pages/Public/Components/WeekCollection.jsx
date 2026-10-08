@@ -50,7 +50,7 @@ export default function WeekCollection({ products = [] }) {
                         <SwiperSlide key={product.id} style={{ width: '302px' }} className="product">
                             <Link to={`/product/${product.id}`}>
                                 <div className="img relative">
-                                    <img src={coverImage(product) || fallback} alt={product.name} className="w-full" />
+                                    <img src={coverImage(product) || fallback} alt={product.name} className="w-full" loading="lazy" decoding="async" />
                                     <span className="absolute bottom-0 bg-[#dcdcdc9c] w-[34px] h-[34px] right-[45%] flex items-center justify-center cursor-pointer">
                                         <GoPlus className="text-white text-[20px]" />
                                     </span>

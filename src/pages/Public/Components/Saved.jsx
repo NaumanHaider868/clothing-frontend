@@ -20,7 +20,7 @@ export default function Saved() {
               </button>
               <Link to={`/product/${product.id}`} className="product shop-card">
                 <div className="img">
-                  <img src={product.image || fallback} alt={product.name} />
+                  <img src={product.image || fallback} alt={product.name} loading="lazy" decoding="async" />
                 </div>
                 <div className="details pt-[14px]">
                   <span className="type text-[#525252] text-[12px]">{product.collection || product.type}</span>

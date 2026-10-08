@@ -49,7 +49,7 @@ export default function YearCollection({ products = [] }) {
                 {visible.map((product) => (
                     <Link key={product.id} to={`/product/${product.id}`} className="product w-[366px]">
                         <div className="img relative">
-                            <img src={coverImage(product) || fallback} alt={product.name} className="w-full object-cover" />
+                            <img src={coverImage(product) || fallback} alt={product.name} className="w-full object-cover" loading="lazy" decoding="async" />
                             <span className="absolute bottom-0 bg-[#dcdcdc9c] right-[45%] flex items-center justify-center cursor-pointer">
                                 <GoPlus className="text-white text-[20px]" />
                             </span>
