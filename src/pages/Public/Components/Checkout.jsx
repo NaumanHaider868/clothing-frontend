@@ -13,7 +13,7 @@ import { lineTotal, money, variantImage } from '../../../utlis/product';
 const ProductItem = ({ imgSrc, title, price, colorSize, count }) => (
     <div className="item">
         <div className="img">
-            <img src={imgSrc} className="w-full h-full" alt={title} />
+            <img src={imgSrc} className="w-full h-full" alt={title} loading="lazy" decoding="async" />
         </div>
         <div className="content">
             <div className="detail">

@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
-import { IoIosArrowForward, IoIosArrowUp } from 'react-icons/io';
-import { Range } from 'react-range';
+import React from 'react';
+import { IoClose } from 'react-icons/io5';
+import { getTrackBackground, Range } from 'react-range';
+import { money } from '../../../utlis/product';
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', '2X'];
+const PRICE_MIN = 0;
+const PRICE_MAX = 1000;
 
 export default function Filter({
     seasons,
@@ -16,135 +19,137 @@ export default function Filter({
     onStock,
     onPrice,
     onSale,
+    onClear,
+    onClose,
 }) {
-    const [openSections, setOpenSections] = useState(['seasons']);
-
-    const toggleSection = (section) => {
-        setOpenSections((current) =>
-            current.includes(section) ? current.filter((item) => item !== section) : [...current, section]
-        );
-    };
+    const priceOn = priceRange[0] !== PRICE_MIN || priceRange[1] !== PRICE_MAX;
+    const active = [season, size, stock, sale, priceOn ? 'price' : ''].filter(Boolean).length;
 
     return (
-        <div className="sidebar">
-            <span className="text-[16px] font-medium">Filters</span>
-
-            <div className="sizes">
-                <button
-                    type="button"
-                    onClick={() => onSale(sale ? '' : '1')}
-                    className={`mt-3 px-3 py-1 border cursor-pointer ${sale ? 'bg-black text-white' : ''}`}
-                >
-                    On sale
+        <div className="shop-filter">
+            <div className="shop-filter-bar">
+                <span>Filter</span>
+                <button type="button" className="shop-filter-close" onClick={onClose} aria-label="Close filters">
+                    <IoClose />
                 </button>
             </div>
 
-            <div className="sizes">
-                <span>Size</span>
-                <div className="size flex gap-2 mt-2">
+            <section>
+                <span className="shop-filter-label">Sale</span>
+                <button
+                    type="button"
+                    className={`shop-filter-sale ${sale ? 'is-on' : ''}`}
+                    onClick={() => onSale(sale ? '' : '1')}
+                    aria-pressed={Boolean(sale)}
+                >
+                    <span>On sale</span>
+                    <i />
+                </button>
+            </section>
+
+            <section>
+                <span className="shop-filter-label">Size</span>
+                <div className="shop-filter-sizes">
                     {SIZES.map((item) => (
                         <button
                             key={item}
                             type="button"
+                            className={size === item ? 'is-on' : ''}
                             onClick={() => onSize(size === item ? '' : item)}
-                            className={`px-3 py-1 border text-center cursor-pointer ${size === item ? 'bg-black text-white' : ''}`}
+                            aria-pressed={size === item}
                         >
                             {item}
                         </button>
                     ))}
                 </div>
-            </div>
+            </section>
 
-            <div className="accordions w-full max-w-sm mx-auto mt-5">
-                <div className="accordion">
-                    <button
-                        type="button"
-                        className="w-full text-left py-3 flex justify-between items-center"
-                        onClick={() => toggleSection('availability')}
-                    >
-                        <span className="font-semibold">Availability</span>
-                        <span>
-                            {openSections.includes('availability') ? <IoIosArrowUp /> : <IoIosArrowForward />}
-                        </span>
-                    </button>
-                    {openSections.includes('availability') && (
-                        <div className="pb-3 pl-4">
-                            {[
-                                { label: 'In stock', value: 'in' },
-                                { label: 'Out of stock', value: 'out' },
-                            ].map((option) => (
-                                <label key={option.value} className="flex items-center space-x-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={stock === option.value}
-                                        onChange={() => onStock(stock === option.value ? '' : option.value)}
-                                    />
-                                    <span>{option.label}</span>
-                                </label>
-                            ))}
+            <section>
+                <span className="shop-filter-label">Availability</span>
+                <div className="shop-filter-list">
+                    {[
+                        { label: 'In stock', value: 'in' },
+                        { label: 'Out of stock', value: 'out' },
+                    ].map((option) => (
+                        <button
+                            key={option.value}
+                            type="button"
+                            className={stock === option.value ? 'is-on' : ''}
+                            onClick={() => onStock(stock === option.value ? '' : option.value)}
+                            aria-pressed={stock === option.value}
+                        >
+                            {option.label}
+                        </button>
+                    ))}
+                </div>
+            </section>
+
+            <section>
+                <div className="shop-filter-price-head">
+                    <span className="shop-filter-label">Price</span>
+                    <span>{money(priceRange[0])} – {money(priceRange[1])}</span>
+                </div>
+                <Range
+                    values={priceRange}
+                    step={10}
+                    min={PRICE_MIN}
+                    max={PRICE_MAX}
+                    onChange={onPrice}
+                    renderTrack={({ props, children }) => (
+                        <div
+                            onMouseDown={props.onMouseDown}
+                            onTouchStart={props.onTouchStart}
+                            className="shop-filter-track"
+                            style={props.style}
+                        >
+                            <div
+                                ref={props.ref}
+                                className="shop-filter-track-bar"
+                                style={{
+                                    background: getTrackBackground({
+                                        values: priceRange,
+                                        colors: ['#d9d9d9', '#111111', '#d9d9d9'],
+                                        min: PRICE_MIN,
+                                        max: PRICE_MAX,
+                                    }),
+                                }}
+                            >
+                                {children}
+                            </div>
                         </div>
                     )}
-                </div>
+                    renderThumb={({ props }) => {
+                        const { key, ...thumb } = props;
+                        return <div key={key} {...thumb} className="shop-filter-thumb" />;
+                    }}
+                />
+            </section>
 
-                <div className="accordion">
-                    <button
-                        type="button"
-                        className="w-full text-left py-3 flex justify-between items-center"
-                        onClick={() => toggleSection('price')}
-                    >
-                        <span className="font-semibold">Price Range</span>
-                        <span>
-                            {openSections.includes('price') ? <IoIosArrowUp /> : <IoIosArrowForward />}
-                        </span>
-                    </button>
-                    {openSections.includes('price') && (
-                        <div className="pb-3 pl-4">
-                            <Range
-                                values={priceRange}
-                                step={10}
-                                min={0}
-                                max={1000}
-                                onChange={onPrice}
-                                renderTrack={({ props, children }) => (
-                                    <div {...props} className="w-full h-2 bg-gray-300 rounded-lg">
-                                        {children}
-                                    </div>
-                                )}
-                                renderThumb={({ props }) => (
-                                    <div {...props} className="w-5 h-5 bg-black rounded-full shadow-md" />
-                                )}
-                            />
-                            <p className="text-sm mt-2">${priceRange[0]} - ${priceRange[1]}</p>
-                        </div>
-                    )}
+            <section>
+                <span className="shop-filter-label">Season</span>
+                <div className="shop-filter-list">
+                    {seasons.length === 0 ? <p className="shop-filter-empty">No seasons yet</p> : null}
+                    {seasons.map((item) => (
+                        <button
+                            key={item}
+                            type="button"
+                            className={season === item ? 'is-on' : ''}
+                            onClick={() => onSeason(season === item ? '' : item)}
+                            aria-pressed={season === item}
+                        >
+                            {item.charAt(0).toUpperCase() + item.slice(1)}
+                        </button>
+                    ))}
                 </div>
+            </section>
 
-                <div className="accordion">
-                    <button
-                        type="button"
-                        className="w-full text-left py-3 flex justify-between items-center"
-                        onClick={() => toggleSection('seasons')}
-                    >
-                        <span className="font-semibold">Seasons</span>
-                        <span>
-                            {openSections.includes('seasons') ? <IoIosArrowUp /> : <IoIosArrowForward />}
-                        </span>
-                    </button>
-                    {openSections.includes('seasons') && (
-                        <div className="product-btns pb-3 pl-4">
-                            {seasons.map((item) => (
-                                <button
-                                    key={item}
-                                    type="button"
-                                    className={season === item ? 'bg-black text-white' : ''}
-                                    onClick={() => onSeason(season === item ? '' : item)}
-                                >
-                                    {item.charAt(0).toUpperCase() + item.slice(1)}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
+            <div className="shop-filter-actions">
+                <button type="button" className="shop-filter-clear" onClick={onClear} disabled={!active}>
+                    Clear filters
+                </button>
+                <button type="button" className="shop-filter-done" onClick={onClose}>
+                    View products
+                </button>
             </div>
         </div>
     );

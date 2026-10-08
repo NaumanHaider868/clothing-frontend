@@ -44,7 +44,7 @@ export default function Cart() {
                             <div className="product" key={item.id}>
                                 <div className='detail'>
                                     <Link to={`/product/${item.product.id}`} className="image">
-                                        <img src={variantImage(item.variant) || fallback} alt={item.product.name} />
+                                        <img src={variantImage(item.variant) || fallback} alt={item.product.name} loading="lazy" decoding="async" />
                                         <span>{item.product.collection || item.product.type}</span>
                                     </Link>
                                     <div className='price'>

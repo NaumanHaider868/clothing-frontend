@@ -9,7 +9,7 @@ export default function Approach() {
                 {GENDERS.map((gender) => (
                     <div className="tile-block" key={gender.value}>
                         <Link to={`/products?gender=${gender.value}`} className="tile">
-                            <img src={gender.image} alt="" />
+                            <img src={gender.image} alt="" loading="lazy" decoding="async" />
                             <span>{gender.label}</span>
                         </Link>
                         <div className="cats">
